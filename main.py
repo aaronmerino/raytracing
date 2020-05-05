@@ -24,23 +24,43 @@ class Example(Frame):
         
         #  def __init__(self, origin: Vec3, focal_length: float, view_dir: Vec3, l: int, r: int, b: int, t: int):
         cam = Camera(Vec3(0,0,0), 100, Vec3(0,1,0), -400, 400, -400, 400)
-        sphere = Sphere(Vec3(0, 100, 0), 50)
+        objects = []
+
+        # sphere = Sphere(Vec3(0, 100, 0), 50)
+        objects.append(Sphere(Vec3(0, 100, 0), 50))
+        objects.append(Sphere(Vec3(-12, 60, -20), 10))
+        objects.append(Sphere(Vec3(-12, 60, 20), 10))
+        objects.append(Sphere(Vec3(12, 60, 20), 10))
+        objects.append(Sphere(Vec3(-12, 80, 40), 10))
 
         for i in range(0, 800):
             for j in range(0, 800):
                 ray = cam.compute_ray(i, j, 800, 800)
+                
+                obj_hit = None
+                t = 1000000
+                n = None
+                for o in objects:
+                    res = o.hit(ray)
+                    if (res[0]):
+                        tr = res[1].ts[0]
+                        if (tr < t):
+                            t = tr
+                            obj_hit = o
+                            n = res[1].ns[0]
 
-                res = sphere.hit(ray)
-                if (res[0]):
-                    n = res[1].ns[0]
-                    t = res[1].ts[0]
+                # res = o.hit(ray)
+                # if (res[0]):
+                if (obj_hit):
+                    # n = res[1].ns[0]
+                    # t = res[1].ts[0]
 
-                    lightsource = Vec3(-50, 0, 50)
+                    lightsource = Vec3(-50, 20, 50)
                     lightsource_dir = (lightsource - ray.getPoint(t)).normalize()
                     # print(ray.getPoint(t))
-                    Lr = min(int((0.5 * 1 * max(0,  n.dot(lightsource_dir))) * 255), 255)
-                    Lg = min(int((0.8 * 1.5 * max(0,  n.dot(lightsource_dir))) * 255), 255)
-                    Lb = min(int((0.3 * 0.8 * max(0,  n.dot(lightsource_dir))) * 255), 255)
+                    Lr = min(int((0.4 * 3 * max(0,  n.dot(lightsource_dir))) * 255), 255)
+                    Lg = min(int((0.3 * 2 * max(0,  n.dot(lightsource_dir))) * 255), 255)
+                    Lb = min(int((0.4 * 0.2 * max(0,  n.dot(lightsource_dir))) * 255), 255)
 
                     Lr = hex(Lr)[2:]
                     Lg = hex(Lg)[2:]
