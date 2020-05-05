@@ -3,6 +3,7 @@ from tkinter import Tk, Canvas, Frame, BOTH
 from surface import Surface
 from sphere  import Sphere
 from vector3 import Vec3
+import math
 
 class Example(Frame):
 
@@ -23,7 +24,7 @@ class Example(Frame):
         
         #  def __init__(self, origin: Vec3, focal_length: float, view_dir: Vec3, l: int, r: int, b: int, t: int):
         cam = Camera(Vec3(0,0,0), 100, Vec3(0,1,0), -400, 400, -400, 400)
-        sphere = Sphere(Vec3(20, 100, 50), 50)
+        sphere = Sphere(Vec3(0, 100, 0), 50)
 
         for i in range(0, 800):
             for j in range(0, 800):
@@ -31,7 +32,33 @@ class Example(Frame):
 
                 res = sphere.hit(ray)
                 if (res[0]):
-                    canvas.create_rectangle((i, j)*2, outline="", fill="#%02x%02x%02x" % (109, 170, 44))
+                    n = res[1].ns[0]
+                    t = res[1].ts[0]
+
+                    lightsource = Vec3(-50, 0, 50)
+                    lightsource_dir = (lightsource - ray.getPoint(t)).normalize()
+                    # print(ray.getPoint(t))
+                    Lr = min(int((0.5 * 1 * max(0,  n.dot(lightsource_dir))) * 255), 255)
+                    Lg = min(int((0.8 * 1.5 * max(0,  n.dot(lightsource_dir))) * 255), 255)
+                    Lb = min(int((0.3 * 0.8 * max(0,  n.dot(lightsource_dir))) * 255), 255)
+
+                    Lr = hex(Lr)[2:]
+                    Lg = hex(Lg)[2:]
+                    Lb = hex(Lb)[2:]
+                    
+                    if len(Lr) == 1:
+                        Lr = '0'+ Lr
+                    if len(Lg) == 1:
+                        Lg = '0'+ Lg
+                    if len(Lb) == 1:
+                        Lb = '0'+ Lb
+                    
+                    hex_fill = '#' + Lr + Lg + Lb
+
+                    #"#" + hex(Lr)[2:] + hex(Lg)[2:] + hex(Lb)[2:]
+                    
+                    
+                    canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
                 
 
 

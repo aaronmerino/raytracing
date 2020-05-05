@@ -7,13 +7,15 @@ class Surface:
         self.origin = origin
 
     def hit(self, ray: Ray):
-        return (False, None, None)
+        return (False, None)
     
+    def normal(self, p: Vec3):
+        return None
+
     def boundingBox(self):
         return None
 
 class HitRec:
-    def __init__(self, ray: Ray, ts: list, ns: list):
-        self.ray = ray
+    def __init__(self, ts: list, ns: list):
         self.ts = ts
         self.ns = ns

@@ -19,7 +19,7 @@ class Vec3:
                     self.z * v.x - self.x * v.z,
                     self.x * v.y - self.y * v.x)
 
-    def normalize(self) -> None:
+    def normalize(self) -> Vec3:
         len = self.length()
 
         if (len > 0):
