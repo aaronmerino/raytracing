@@ -2,6 +2,7 @@ from camera import Camera
 from tkinter import Tk, Canvas, Frame, BOTH
 from surface import Surface
 from sphere  import Sphere
+from triangle  import Triangle
 from vector3 import Vec3
 import math
 
@@ -32,6 +33,8 @@ class Example(Frame):
         objects.append(Sphere(Vec3(-12, 60, 20), 10))
         objects.append(Sphere(Vec3(12, 60, 20), 10))
         objects.append(Sphere(Vec3(-12, 80, 40), 10))
+        objects.append(Triangle(Vec3(0, 60, -30), Vec3(40, 60, -20), Vec3(10, 60, 10)))
+        objects.append(Triangle(Vec3(0, 60, -30), Vec3(10, 40, -50), Vec3(40, 60, -20)))
 
         for i in range(0, 800):
             for j in range(0, 800):
