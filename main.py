@@ -27,7 +27,7 @@ class Example(Frame):
             outline="", fill="#8c8c8c")
         
         #  def __init__(self, origin: Vec3, focal_length: float, view_dir: Vec3, l: int, r: int, b: int, t: int):
-        cam = Camera(Vec3(0,0,0), 100, Vec3(0,1,0), -WIDTH//2, WIDTH//2, -HEIGHT//2, HEIGHT//2)
+        cam = Camera(Vec3(20,0,-50), 100, Vec3(-0.2,1,0.4), -WIDTH//2, WIDTH//2, -HEIGHT//2, HEIGHT//2)
         objects = []
 
         # sphere = Sphere(Vec3(0, 100, 0), 50)
@@ -40,6 +40,12 @@ class Example(Frame):
         objects.append(Triangle(Vec3(0, 60, -30), Vec3(10, 40, -50), Vec3(40, 60, -20)))
 
         objects.append(Sphere(Vec3(-35, 34, 34), 5))
+
+        objects.append(Triangle(Vec3(-50, 50, -80), Vec3(50, 50, -80), Vec3(-50, 100, -80)))
+        objects.append(Triangle(Vec3(50, 50, -80), Vec3(50, 100, -80), Vec3(-50, 100, -80)))
+
+        objects.append(Triangle(Vec3(-50, 50, 80), Vec3(-50, 100, 80), Vec3(50, 50, 80)))
+        objects.append(Triangle(Vec3(50, 50, 80), Vec3(-50, 100, 80), Vec3(50, 100, 80)))
 
         for i in range(0, WIDTH):
             for j in range(0, HEIGHT):
@@ -80,9 +86,9 @@ class Example(Frame):
                     if (not SHADOWED):
                         h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
                         # print(ray.getPoint(t))
-                        Lr = min(int((0.1 * 0.3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 0.3 * max(0, n.dot(h)**5))) * 255, 255)
-                        Lg = min(int((0.3 * 2 * max(0,  n.dot(lightsource_dir)) + 0.5 * 2 * max(0, n.dot(h)**8)) * 255), 255)
-                        Lb = min(int((0.6 * 3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 3 * max(0, n.dot(h)**8)) * 255), 255)
+                        Lr = min(int((0.1 * 4.5 * max(0,  n.dot(lightsource_dir)) + 0.5 * 4.5 * max(0, n.dot(h)**5)) * 255), 255)
+                        Lg = min(int((0.3 * 3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 3 * max(0, n.dot(h)**8)) * 255), 255)
+                        Lb = min(int((0.6 * 0.3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 0.3 * max(0, n.dot(h)**8)) * 255), 255)
 
                         Lr = hex(Lr)[2:]
                         Lg = hex(Lg)[2:]
@@ -102,7 +108,26 @@ class Example(Frame):
                         
                         canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
                     else:
-                        canvas.create_rectangle((i, j)*2, outline="", fill="#000000")
+                        h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
+                        # print(ray.getPoint(t))
+                        Lr = min(int(0.1 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255), 255)
+                        Lg = min(int(0.3 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
+                        Lb = min(int(0.3 * 0.3 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
+
+                        Lr = hex(Lr)[2:]
+                        Lg = hex(Lg)[2:]
+                        Lb = hex(Lb)[2:]
+                        
+                        if len(Lr) == 1:
+                            Lr = '0'+ Lr
+                        if len(Lg) == 1:
+                            Lg = '0'+ Lg
+                        if len(Lb) == 1:
+                            Lb = '0'+ Lb
+                        
+                        hex_fill = '#' + Lr + Lg + Lb
+                        
+                        canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
                 
 
 
