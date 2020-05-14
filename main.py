@@ -4,8 +4,11 @@ from surface import Surface
 from sphere  import Sphere
 from triangle  import Triangle
 from vector3 import Vec3
+from ray import Ray
 import math
 
+WIDTH = 400
+HEIGHT = 400
 class Example(Frame):
 
     def __init__(self):
@@ -21,10 +24,10 @@ class Example(Frame):
 
         canvas = Canvas(self)
         canvas.create_rectangle((5, 5)*2,
-            outline="", fill="#fb0")
+            outline="", fill="#8c8c8c")
         
         #  def __init__(self, origin: Vec3, focal_length: float, view_dir: Vec3, l: int, r: int, b: int, t: int):
-        cam = Camera(Vec3(0,0,0), 100, Vec3(0,1,0), -400, 400, -400, 400)
+        cam = Camera(Vec3(0,0,0), 100, Vec3(0,1,0), -WIDTH//2, WIDTH//2, -HEIGHT//2, HEIGHT//2)
         objects = []
 
         # sphere = Sphere(Vec3(0, 100, 0), 50)
@@ -36,9 +39,11 @@ class Example(Frame):
         objects.append(Triangle(Vec3(0, 60, -30), Vec3(40, 60, -20), Vec3(10, 60, 10)))
         objects.append(Triangle(Vec3(0, 60, -30), Vec3(10, 40, -50), Vec3(40, 60, -20)))
 
-        for i in range(0, 800):
-            for j in range(0, 800):
-                ray = cam.compute_ray(i, j, 800, 800)
+        objects.append(Sphere(Vec3(-35, 34, 34), 5))
+
+        for i in range(0, WIDTH):
+            for j in range(0, HEIGHT):
+                ray = cam.compute_ray(i, j, WIDTH, HEIGHT)
                 
                 obj_hit = None
                 t = 1000000
@@ -60,28 +65,44 @@ class Example(Frame):
 
                     lightsource = Vec3(-50, 20, 50)
                     lightsource_dir = (lightsource - ray.getPoint(t)).normalize()
-                    # print(ray.getPoint(t))
-                    Lr = min(int((0.4 * 3 * max(0,  n.dot(lightsource_dir))) * 255), 255)
-                    Lg = min(int((0.3 * 2 * max(0,  n.dot(lightsource_dir))) * 255), 255)
-                    Lb = min(int((0.4 * 0.2 * max(0,  n.dot(lightsource_dir))) * 255), 255)
 
-                    Lr = hex(Lr)[2:]
-                    Lg = hex(Lg)[2:]
-                    Lb = hex(Lb)[2:]
-                    
-                    if len(Lr) == 1:
-                        Lr = '0'+ Lr
-                    if len(Lg) == 1:
-                        Lg = '0'+ Lg
-                    if len(Lb) == 1:
-                        Lb = '0'+ Lb
-                    
-                    hex_fill = '#' + Lr + Lg + Lb
 
-                    #"#" + hex(Lr)[2:] + hex(Lg)[2:] + hex(Lb)[2:]
+                    shadow_ray = Ray(ray.getPoint(t), lightsource_dir)
+                    SHADOWED = False
+                    for o in objects:
+                        if o == obj_hit:
+                            continue
+
+                        res = o.hit(shadow_ray)
+                        if (res[0]):
+                            SHADOWED = True
                     
-                    
-                    canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
+                    if (not SHADOWED):
+                        h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
+                        # print(ray.getPoint(t))
+                        Lr = min(int((0.1 * 0.3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 0.3 * max(0, n.dot(h)**5))) * 255, 255)
+                        Lg = min(int((0.3 * 2 * max(0,  n.dot(lightsource_dir)) + 0.5 * 2 * max(0, n.dot(h)**8)) * 255), 255)
+                        Lb = min(int((0.6 * 3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 3 * max(0, n.dot(h)**8)) * 255), 255)
+
+                        Lr = hex(Lr)[2:]
+                        Lg = hex(Lg)[2:]
+                        Lb = hex(Lb)[2:]
+                        
+                        if len(Lr) == 1:
+                            Lr = '0'+ Lr
+                        if len(Lg) == 1:
+                            Lg = '0'+ Lg
+                        if len(Lb) == 1:
+                            Lb = '0'+ Lb
+                        
+                        hex_fill = '#' + Lr + Lg + Lb
+
+                        #"#" + hex(Lr)[2:] + hex(Lg)[2:] + hex(Lb)[2:]
+                        
+                        
+                        canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
+                    else:
+                        canvas.create_rectangle((i, j)*2, outline="", fill="#000000")
                 
 
 
@@ -92,7 +113,7 @@ def main():
 
     root = Tk()
     ex = Example()
-    root.geometry("800x800")
+    root.geometry(str(WIDTH) + 'x' + str(HEIGHT))
     root.mainloop()
 
 

@@ -59,7 +59,7 @@ class Triangle(Surface):
             return (False, None)
 
         beta = (j*(e*i - h*f) + k*(g*f - d*i) + l*(d*h - e*g))/M
-        if (beta < 0 or beta > 1 - gamma):
+        if (beta < 0 or (beta + gamma) > 1 ):
             # print('here3')
             return (False, None)
 
