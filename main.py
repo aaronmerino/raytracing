@@ -9,6 +9,71 @@ import math
 
 WIDTH = 400
 HEIGHT = 400
+MAX_RENDER_DIST = 1000000
+
+def hit(ray: Ray, objects: list, obj_ignore: Surface):
+    obj_hit = None
+    t = MAX_RENDER_DIST
+    n = None
+
+    for o in objects:
+        if o == obj_ignore:
+            continue
+
+        res = o.hit(ray)
+        if (res[0]):
+            tr = res[1].ts[0]
+            if (tr < t):
+                t = tr
+                obj_hit = o
+                n = res[1].ns[0]
+    return (obj_hit, t, n)
+
+def rayColor(ray: Ray, objects: list, depth: int, obj_ignore: Surface):
+    if depth == 5:
+        return (0, 0, 0)
+
+    obj_hit, t, n = hit(ray, objects, obj_ignore)
+
+    if (obj_hit):
+        lightsource = Vec3(-50, 20, 50)
+        lightsource_dir = (lightsource - ray.getPoint(t)).normalize()
+        shadow_ray = Ray(ray.getPoint(t), lightsource_dir)
+        SHADOWED = False
+
+        hex_fill = None
+
+        for o in objects:
+            if o == obj_hit:
+                continue
+
+            res = o.hit(shadow_ray)
+            if (res[0]):
+                SHADOWED = True
+        
+        if (not SHADOWED):
+            h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
+            reflection_dir = ray.dir - n.scale(2*ray.dir.dot(n))
+            reflection = Ray(ray.getPoint(t), reflection_dir)
+            rec_ref = rayColor(reflection, objects, depth+1, obj_hit)
+            Lr = min(int((0.1 * 4.5 * max(0,  n.dot(lightsource_dir)) + 0.5 * 4.5 * max(0, n.dot(h)**8) + 2*rec_ref[0]/255) * 255), 255)
+            Lg = min(int((0.3 * 3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 3 * max(0, n.dot(h)**8) + 2*rec_ref[1]/255) * 255), 255)
+            Lb = min(int((0.6 * 0.3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 0.3 * max(0, n.dot(h)**8) + 2*rec_ref[2]/255) * 255), 255)
+
+            return (Lr, Lg, Lb)
+
+        else:
+            h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
+            # print(ray.getPoint(t))
+            Lr = min(int(0.1 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255), 255)
+            Lg = min(int(0.3 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
+            Lb = min(int(0.3 * 0.3 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
+
+            return (Lr, Lg, Lb)
+
+   
+    return (0 , 0, 0)
+        
 class Example(Frame):
 
     def __init__(self):
@@ -27,7 +92,10 @@ class Example(Frame):
             outline="", fill="#8c8c8c")
         
         #  def __init__(self, origin: Vec3, focal_length: float, view_dir: Vec3, l: int, r: int, b: int, t: int):
-        cam = Camera(Vec3(20,0,-50), 100, Vec3(-0.2,1,0.4), -WIDTH//2, WIDTH//2, -HEIGHT//2, HEIGHT//2)
+        cam_pos = Vec3(20,3,50)
+        # cam_dir = Vec3(-0.2,1,0.4)
+        cam_dir = Vec3(0.2,1,-0.3)
+        cam = Camera(cam_pos, 100, cam_dir, -WIDTH//2, WIDTH//2, -HEIGHT//2, HEIGHT//2)
         objects = []
 
         # sphere = Sphere(Vec3(0, 100, 0), 50)
@@ -50,86 +118,22 @@ class Example(Frame):
         for i in range(0, WIDTH):
             for j in range(0, HEIGHT):
                 ray = cam.compute_ray(i, j, WIDTH, HEIGHT)
+
+                Lr, Lg, Lb = rayColor(ray, objects, 0, None)
+
+                Lr = hex(Lr)[2:]
+                Lg = hex(Lg)[2:]
+                Lb = hex(Lb)[2:]
                 
-                obj_hit = None
-                t = 1000000
-                n = None
-                for o in objects:
-                    res = o.hit(ray)
-                    if (res[0]):
-                        tr = res[1].ts[0]
-                        if (tr < t):
-                            t = tr
-                            obj_hit = o
-                            n = res[1].ns[0]
-
-                # res = o.hit(ray)
-                # if (res[0]):
-                if (obj_hit):
-                    # n = res[1].ns[0]
-                    # t = res[1].ts[0]
-
-                    lightsource = Vec3(-50, 20, 50)
-                    lightsource_dir = (lightsource - ray.getPoint(t)).normalize()
-
-
-                    shadow_ray = Ray(ray.getPoint(t), lightsource_dir)
-                    SHADOWED = False
-                    for o in objects:
-                        if o == obj_hit:
-                            continue
-
-                        res = o.hit(shadow_ray)
-                        if (res[0]):
-                            SHADOWED = True
-                    
-                    if (not SHADOWED):
-                        h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
-                        # print(ray.getPoint(t))
-                        Lr = min(int((0.1 * 4.5 * max(0,  n.dot(lightsource_dir)) + 0.5 * 4.5 * max(0, n.dot(h)**5)) * 255), 255)
-                        Lg = min(int((0.3 * 3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 3 * max(0, n.dot(h)**8)) * 255), 255)
-                        Lb = min(int((0.6 * 0.3 * max(0,  n.dot(lightsource_dir)) + 0.5 * 0.3 * max(0, n.dot(h)**8)) * 255), 255)
-
-                        Lr = hex(Lr)[2:]
-                        Lg = hex(Lg)[2:]
-                        Lb = hex(Lb)[2:]
-                        
-                        if len(Lr) == 1:
-                            Lr = '0'+ Lr
-                        if len(Lg) == 1:
-                            Lg = '0'+ Lg
-                        if len(Lb) == 1:
-                            Lb = '0'+ Lb
-                        
-                        hex_fill = '#' + Lr + Lg + Lb
-
-                        #"#" + hex(Lr)[2:] + hex(Lg)[2:] + hex(Lb)[2:]
-                        
-                        
-                        canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
-                    else:
-                        h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
-                        # print(ray.getPoint(t))
-                        Lr = min(int(0.1 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255), 255)
-                        Lg = min(int(0.3 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
-                        Lb = min(int(0.3 * 0.3 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
-
-                        Lr = hex(Lr)[2:]
-                        Lg = hex(Lg)[2:]
-                        Lb = hex(Lb)[2:]
-                        
-                        if len(Lr) == 1:
-                            Lr = '0'+ Lr
-                        if len(Lg) == 1:
-                            Lg = '0'+ Lg
-                        if len(Lb) == 1:
-                            Lb = '0'+ Lb
-                        
-                        hex_fill = '#' + Lr + Lg + Lb
-                        
-                        canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
+                if len(Lr) == 1:
+                    Lr = '0'+ Lr
+                if len(Lg) == 1:
+                    Lg = '0'+ Lg
+                if len(Lb) == 1:
+                    Lb = '0'+ Lb
                 
-
+                hex_fill = '#' + Lr + Lg + Lb
+                canvas.create_rectangle((i, j)*2, outline="", fill=hex_fill)
 
         canvas.pack(fill=BOTH, expand=1)
 
