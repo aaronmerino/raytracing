@@ -17,9 +17,6 @@ def hit(ray: Ray, objects: list, obj_ignore: Surface):
     n = None
 
     for o in objects:
-        if o == obj_ignore:
-            continue
-
         res = o.hit(ray)
         if (res[0]):
             tr = res[1].ts[0]
@@ -41,15 +38,13 @@ def rayColor(ray: Ray, objects: list, depth: int, obj_ignore: Surface):
         shadow_ray = Ray(ray.getPoint(t), lightsource_dir)
         SHADOWED = False
 
-        hex_fill = None
+        # hex_fill = None
 
         for o in objects:
-            if o == obj_hit:
-                continue
-
             res = o.hit(shadow_ray)
             if (res[0]):
                 SHADOWED = True
+                break
         
         if (not SHADOWED):
             h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
@@ -65,8 +60,8 @@ def rayColor(ray: Ray, objects: list, depth: int, obj_ignore: Surface):
         else:
             h = ((ray.dir.scale(-1)) + lightsource_dir).normalize()
             # print(ray.getPoint(t))
-            Lr = min(int(0.1 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255), 255)
-            Lg = min(int(0.3 * 0.7 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
+            Lr = min(int(0.1 * 4.5 * max(0,  n.dot(lightsource_dir)) * 255), 255)
+            Lg = min(int(0.3 * 3 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
             Lb = min(int(0.3 * 0.3 * max(0,  n.dot(lightsource_dir)) * 255) , 255)
 
             return (Lr, Lg, Lb)
@@ -92,9 +87,8 @@ class Example(Frame):
             outline="", fill="#8c8c8c")
         
         #  def __init__(self, origin: Vec3, focal_length: float, view_dir: Vec3, l: int, r: int, b: int, t: int):
-        cam_pos = Vec3(20,3,50)
-        # cam_dir = Vec3(-0.2,1,0.4)
-        cam_dir = Vec3(0.2,1,-0.3)
+        cam_pos = Vec3(0,10,-20)
+        cam_dir = Vec3(0,1,0.1)
         cam = Camera(cam_pos, 100, cam_dir, -WIDTH//2, WIDTH//2, -HEIGHT//2, HEIGHT//2)
         objects = []
 
@@ -109,11 +103,11 @@ class Example(Frame):
 
         objects.append(Sphere(Vec3(-35, 34, 34), 5))
 
-        objects.append(Triangle(Vec3(-50, 50, -80), Vec3(50, 50, -80), Vec3(-50, 100, -80)))
-        objects.append(Triangle(Vec3(50, 50, -80), Vec3(50, 100, -80), Vec3(-50, 100, -80)))
+        objects.append(Triangle(Vec3(-50, 20, -80), Vec3(50, 20, -80), Vec3(-50, 200, -80)))
+        objects.append(Triangle(Vec3(50, 20, -80), Vec3(50, 200, -80), Vec3(-50, 200, -80)))
 
-        objects.append(Triangle(Vec3(-50, 50, 80), Vec3(-50, 100, 80), Vec3(50, 50, 80)))
-        objects.append(Triangle(Vec3(50, 50, 80), Vec3(-50, 100, 80), Vec3(50, 100, 80)))
+        objects.append(Triangle(Vec3(-50, 20, 100), Vec3(-50, 200, 100), Vec3(50, 20, 100)))
+        objects.append(Triangle(Vec3(50, 20, 100), Vec3(-50, 200, 100), Vec3(50, 200, 100)))
 
         for i in range(0, WIDTH):
             for j in range(0, HEIGHT):

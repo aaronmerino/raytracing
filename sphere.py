@@ -30,11 +30,11 @@ class Sphere(Surface):
 
             # print(str(t1) + ', ' + str(t2))
 
-            if t1 < 0 and t2 < 0:
+            if t2 < 10**(-8):
                 return (False, None)
-            elif t1 < 0 and t2 >= 0:
+            elif t1 < 10**(-8) and t2 >= 10**(-8):
                 return (True, HitRec([t2], [n2]))
-            elif t1 >= 0 and t2 >= 0:
+            elif t1 >= 10**(-8):
                 return (True, HitRec([t1, t2], [n1, n2]))
         else:
             # one solution
